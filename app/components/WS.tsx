@@ -7,11 +7,13 @@ import { Photo } from "@/photos";
 import { useState, useEffect, useRef } from "react";
 
 const rowHeight: number = 500;
-const pageSize = 4;
+const photoWidth: number = 500;
+const pageSize = 5;
+const initialPageCount = 3;
 
 export default function WS({ photos }: { photos: Photo[] }) {
-    const [page, setPage] = useState(1);
-    const [items, setItems] = useState(photos.slice(0, 4));
+    const [page, setPage] = useState(initialPageCount);
+    const [items, setItems] = useState(photos.slice(0, initialPageCount * pageSize));
     const firstRender = useRef(true);
     const outerRef = useRef<HTMLDivElement>(null);
 
@@ -30,11 +32,18 @@ export default function WS({ photos }: { photos: Photo[] }) {
     }, [page]);
 
 
-    const Row = ({ index, style, data }: { index: number, style: any, data: Photo[] }) => (
-        <div style={style}>
-            <img src={data[index].src} style={{ width: "auto", height: `${rowHeight}px` }}></img>
-        </div>
-    );
+    const Row = ({ index, style, data }: { index: number, style: any, data: { rowCount: number, itemsPerRow: number } }) => {
+        const { rowCount, itemsPerRow } = data;
+        const startIndex = itemsPerRow * index;
+        const endIndex = startIndex + itemsPerRow;
+        console.log('startIndex', startIndex)
+        const rowItems = items.slice(startIndex, endIndex);
+        return (
+            <div style={style}>
+                {rowItems.map((photo, pi) => <img key={photo.alt} alt={photo.alt} title={photo.alt} src={photo.src} style={{ width: `${photoWidth}px`, height: `${rowHeight}px`, display: 'inline-block' }}></img>)}
+            </div>
+        );
+    };
 
     const onScroll = ({ scrollDirection, scrollOffset, scrollUpdateWasRequested }) => {
         const container = outerRef.current;
@@ -46,28 +55,38 @@ export default function WS({ photos }: { photos: Photo[] }) {
         const endReached = distanceFromBottom == 0;
         if (endReached) {
             console.log('Reached the bottom of the page!');
-             setPage((prev) => prev + 1);
+            setPage((prev) => prev + 1);
         }
     };
 
 
     return (
         <AutoSizer>
-            {({ height, width }) => (
-                <>
-                    <List outerRef={outerRef}
-                        className="List"
-                        height={rowHeight * 2}
-                        itemCount={items.length}
-                        itemSize={rowHeight}
-                        width={width}
-                        overscanCount={1}
-                        itemData={items}
-                        onScroll={onScroll}
-                    >
-                        {Row}
-                    </List>
-                </>
-            )}
+            {({ height, width }) => {
+                const itemsPerRow = Math.floor(width / photoWidth);
+                // const rows: Photo[][] = [];
+                const rowCount = Math.ceil(items.length / itemsPerRow);
+                console.log('rowCount', rowCount);
+                // for (let i = 0; i < items.length; i++) {
+
+                // }
+                return (
+
+                    <>
+                        <List outerRef={outerRef}
+                            className="List"
+                            height={rowHeight * 2}
+                            itemCount={rowCount}
+                            itemSize={rowHeight}
+                            width={width}
+                            overscanCount={1}
+                            itemData={{ rowCount, itemsPerRow }}
+                            onScroll={onScroll}
+                        >
+                            {Row}
+                        </List>
+                    </>
+                );
+            }}
         </AutoSizer>);
 }

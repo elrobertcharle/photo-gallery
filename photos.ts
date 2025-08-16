@@ -2,10 +2,11 @@
 import fs from "fs";
 import path from "path";
 
-export interface Photo{
+export interface Photo {
   src: string;
   width: number;
   height: number;
+  alt: string;
 }
 
 function imageLink(
@@ -23,9 +24,12 @@ export default async function getPhotos(): Promise<Photo[]> {
 
   const imageFiles = files.filter(f => f.endsWith(".jpg"));
 
-  const photos = imageFiles.map(f => {
+  const photos = imageFiles.map((f, index) => {
     const matcher = f.match(/^(.*)\.(\d+)x(\d+)\.(.+)$/);
-    if (!matcher) return null;
+    if (!matcher) {
+      console.log('bad pic', f, index);
+      return null;
+    };
 
     const [, filePath, w, h, extension] = matcher;
     const width = parseInt(w, 10);
@@ -34,7 +38,8 @@ export default async function getPhotos(): Promise<Photo[]> {
     return {
       src: imageLink(filePath, width, height, extension),
       width,
-      height
+      height,
+      alt: index.toString()
     } as Photo;
   }).filter(Boolean) as Photo[];
 
