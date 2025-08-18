@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import PhotoRow from '@/interfacePhotoRow';
 import { Photo } from '@/photos';
 import Gallery from '@/app/components/Gallery';
@@ -10,9 +10,10 @@ interface Props {
     desiredRowHeight: number;
 }
 
-const initialPageCount = 3;
+const initialPageCount = 10;
 
 export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
+    // console.log('photos.length', photos.length);
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(0);
     const [rows, setRows] = useState<PhotoRow[]>([]);
@@ -28,8 +29,9 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
 
 
     const computeRows = (photos: Photo[], desiredRowHeight: number, rowWidth: number): PhotoRow[] => {
+        console.log('photos.length', photos.length)
         let result: PhotoRow[] = [];
-        let currectRow: PhotoRow = { photos: [], correctHeight: 0 };
+        let currectRow: PhotoRow = { photos: [], correctHeight: 0, scale: 0 };
         let currectRowWidth: number = 0;
         let currectPhotoWidth: number = 0;
         const maxShrinkScale = 1.2;
@@ -46,17 +48,30 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
                 const desviation1 = Math.abs(looksGoodNow.scale - 1);
                 const desviation2 = Math.abs(looksGoodWithAnother.scale - 1);
                 if (desviation2 < desviation1) {
+                    result.push(currectRow);
                     currectRow.photos.push(photo);
-                    currectRow.correctHeight = desiredRowHeight * looksGoodWithAnother.scale;
+                    currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodWithAnother.scale);
+                    currectRow.scale = looksGoodWithAnother.scale;
+
+                    //reset
+                    currectRowWidth = 0;
+                    currectRow = { photos: [], correctHeight: 0, scale: 0 };
+
+                    // console.log('rowWidth', rowWidth, currectRow.photos.reduce((ac, photo) => ac + photo.aspectRatio * desiredRowHeight, 0) * looksGoodWithAnother.scale)
                 } else {
-                    currectRow.correctHeight = desiredRowHeight * looksGoodNow.scale;
+                    result.push(currectRow);
+
+                    currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
+                    currectRow.scale = looksGoodNow.scale;
+
+                    // console.log('rowWidth', rowWidth, currectRow.photos.reduce((ac, photo) => ac + photo.aspectRatio * desiredRowHeight, 0) * looksGoodNow.scale)
+
+                    currectRow = { photos: [photo], correctHeight: 0, scale: 0 };
+                    currectRowWidth = currectPhotoWidth;
                 }
-                result.push(currectRow);
-                //reset
-                currectRowWidth = 0;
-                currectRow = { photos: [], correctHeight: 0 };
             }
         });
+        console.log('computeRows.length', result.reduce((ac, r) => ac + r.photos.length, 0));
         return result;
     };
 
@@ -100,7 +115,10 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
 
                 {({ height, width }) => {
                     return (
-                        <Gallery rows={rows} onScroll={onScroll} rowWidth={width} />
+                        <>
+                            <div>{height},{width}</div>
+                            <Gallery rows={rows} onScroll={onScroll} rowWidth={width} />
+                        </>
                     );
                 }}
 

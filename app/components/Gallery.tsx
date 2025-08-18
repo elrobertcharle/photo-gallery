@@ -44,7 +44,7 @@ export default function Gallery({ rows, rowWidth, onScroll }: { rows: PhotoRow[]
         // const endIndex = startIndex + itemsPerRow;
         // console.log('startIndex', startIndex, 'items.length', items.length)
         // const rowItems = items.slice(startIndex, endIndex);
-        console.log('data', data);
+        //console.log('data', data);
         return (
             <div style={style}>
                 <div style={{ display: "flex" }}>
