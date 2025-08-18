@@ -7,6 +7,7 @@ export interface Photo {
   width: number;
   height: number;
   alt: string;
+  aspectRatio: number;
 }
 
 function imageLink(
@@ -39,7 +40,8 @@ export default async function getPhotos(): Promise<Photo[]> {
       src: imageLink(filePath, width, height, extension),
       width,
       height,
-      alt: index.toString()
+      alt: index.toString(),
+      aspectRatio: width / height
     } as Photo;
   }).filter(Boolean) as Photo[];
 
