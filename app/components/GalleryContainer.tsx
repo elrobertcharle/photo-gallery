@@ -143,7 +143,7 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     }, []);
 
     return (
-        <div ref={containerRef} style={{ width: "100%", backgroundColor: "#F08080" }}>
+        <div ref={containerRef} style={{ width: "100%" }}>
             <Gallery rows={rows} onScroll={onScroll} rowWidth={containerSize.width} height={containerSize.height} />
             {/*<G rows={rows} rowWidth={containerSize.width} height={containerSize.height}></G> */}
         </div>
