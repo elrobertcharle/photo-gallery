@@ -3,11 +3,15 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react
 import PhotoRow from '@/interfacePhotoRow';
 import { Photo } from '@/photos';
 import Gallery from '@/app/components/Gallery';
-import AutoSizer from "react-virtualized-auto-sizer";
 
 interface Props {
     photos: Photo[];
     desiredRowHeight: number;
+}
+
+interface Size {
+    width: number;
+    height: number;
 }
 
 const initialPageCount = 10;
@@ -15,7 +19,7 @@ const initialPageCount = 10;
 export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     // console.log('photos.length', photos.length);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [containerWidth, setContainerWidth] = useState(0);
+    const [containerSize, setContainerSize] = useState<Size>({ width: 0, height: 0 });
     const [rows, setRows] = useState<PhotoRow[]>([]);
     const [page, setPage] = useState(initialPageCount);
 
@@ -77,10 +81,10 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
 
     // Measure container width
     useLayoutEffect(() => {
-        if (!containerRef.current) return;
         const ro = new ResizeObserver(entries => {
             for (let ent of entries) {
-                setContainerWidth(ent.contentRect.width);
+                setContainerSize({ width: ent.contentRect.width, height: ent.contentRect.height });
+                console.log("width", ent.contentRect.width);
             }
         });
         ro.observe(containerRef.current);
@@ -89,12 +93,12 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
 
     // Recompute rows when width or photos change
     useLayoutEffect(() => {
-        if (containerWidth > 0) {
-            const newRows = computeRows(photos, desiredRowHeight, containerWidth);
+        if (containerSize.width > 0) {
+            const newRows = computeRows(photos, desiredRowHeight, containerSize.width);
             // console.log("newRows",newRows)
             setRows(newRows);
         }
-    }, [photos, desiredRowHeight, containerWidth]);
+    }, [photos, desiredRowHeight, containerSize]);
 
     const onScroll = useCallback(({ scrollDirection, scrollOffset, scrollUpdateWasRequested }) => {
         const container = containerRef.current;
@@ -110,20 +114,8 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     }, []);
 
     return (
-        <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
-            <AutoSizer>
-
-                {({ height, width }) => {
-                    return (
-                        <>
-                            <div>{height},{width}</div>
-                            <Gallery rows={rows} onScroll={onScroll} rowWidth={width} />
-                        </>
-                    );
-                }}
-
-
-            </AutoSizer>
+        <div ref={containerRef} style={{ flex: 1, overflow: 'hidden', backgroundColor: "#F08080" }}>
+            <Gallery rows={rows} onScroll={onScroll} rowWidth={containerSize.width} height={containerSize.height} />
         </div>
     );
 }

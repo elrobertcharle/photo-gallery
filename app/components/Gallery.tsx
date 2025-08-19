@@ -7,32 +7,7 @@ import { Photo } from "@/photos";
 import { useState, useEffect, useRef, useCallback } from "react";
 import PhotoRow from "@/interfacePhotoRow";
 
-const rowHeight: number = 500;
-const photoWidth: number = 500;
-const pageSize = 5;
-const initialPageCount = 3;
-
-export default function Gallery({ rows, rowWidth, onScroll }: { rows: PhotoRow[], rowWidth: number, onScroll: ({ scrollDirection, scrollOffset, scrollUpdateWasRequested }) => void }) {
-    console.log('rows', rows);
-    const [page, setPage] = useState(initialPageCount);
-    //const [items, setItems] = useState(() => photos.slice(0, initialPageCount * pageSize));
-    const firstRender = useRef(true);
-
-    // useEffect(() => {
-    //     if (firstRender.current) {
-    //         firstRender.current = false;
-    //         return;
-    //     }
-
-    //     const addPage = () => {
-    //         var newItems = photos.slice((page - 1) * pageSize, pageSize * page);
-    //         setItems((currentItems) => currentItems.concat(newItems));
-    //     };
-
-    //     addPage();
-    // }, [page]);
-
-
+export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: PhotoRow[], rowWidth: number, height: number, onScroll: ({ scrollDirection, scrollOffset, scrollUpdateWasRequested }) => void }) {
     const getRowHeight = useCallback((index: number) => {
         return rows[index].correctHeight;
     }, [rows]);
@@ -40,11 +15,6 @@ export default function Gallery({ rows, rowWidth, onScroll }: { rows: PhotoRow[]
 
     const Row = useCallback(({ index, style, data }: { index: number, style: any, data: PhotoRow[] }) => {
         const row = data[index];
-        // const startIndex = itemsPerRow * index;
-        // const endIndex = startIndex + itemsPerRow;
-        // console.log('startIndex', startIndex, 'items.length', items.length)
-        // const rowItems = items.slice(startIndex, endIndex);
-        //console.log('data', data);
         return (
             <div style={style}>
                 <div style={{ display: "flex" }}>
@@ -59,7 +29,7 @@ export default function Gallery({ rows, rowWidth, onScroll }: { rows: PhotoRow[]
 
         <List
             className="List"
-            height={rowHeight * 2}
+            height={height}
             itemCount={rows.length}
             itemSize={getRowHeight}
             width={rowWidth}
