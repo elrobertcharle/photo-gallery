@@ -17,6 +17,16 @@ interface Size {
 
 const initialPageCount = 10;
 
+function debounce(func, delay) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
 export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     // console.log('photos.length', photos.length);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -93,12 +103,19 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
 
     // Measure container width
     useLayoutEffect(() => {
-        const ro = new ResizeObserver(entries => {
-            for (let ent of entries) {
-                setContainerSize({ width: ent.contentRect.width, height: ent.contentRect.height });
-                // console.log("width", ent.contentRect.width);
+        const handleResize = (entries) => {
+            if (!entries || entries.length === 0) {
+                return;
             }
-        });
+            // We only need the first entry
+            const { width, height } = entries[0].contentRect;
+            console.log('resize')
+            setContainerSize({ width, height });
+        };
+
+        const debouncedHandleResize = debounce(handleResize, 300);
+
+        const ro = new ResizeObserver(debouncedHandleResize);
         ro.observe(containerRef.current);
         return () => ro.disconnect();
     }, []);
@@ -128,7 +145,7 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     return (
         <div ref={containerRef} style={{ width: "100%", backgroundColor: "#F08080" }}>
             <Gallery rows={rows} onScroll={onScroll} rowWidth={containerSize.width} height={containerSize.height} />
-            {/* <G rows={rows} rowWidth={containerSize.width} height={containerSize.height}></G> */}
+            {/*<G rows={rows} rowWidth={containerSize.width} height={containerSize.height}></G> */}
         </div>
     );
 }

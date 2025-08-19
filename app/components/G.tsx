@@ -13,7 +13,7 @@ export default function G({ rows, rowWidth, height }: { rows: PhotoRow[], rowWid
             {rows.map((row, idx) => (
                 <div style={{ height: `${row.correctHeight}px`, display: "flex" }} key={idx}>
                     {row.photos.map((p) => (
-                        <img key={p.alt} title={p.alt} alt={p.alt} src={p.src} style={{ height: `${row.correctHeight}px`}} className="photo" />
+                        <img key={p.alt} title={p.alt} alt={p.alt} src={p.src} style={{ height: `${row.correctHeight}px` }} className="photo" />
                     ))}
                 </div>
             ))}
