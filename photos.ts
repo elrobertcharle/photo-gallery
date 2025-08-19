@@ -45,5 +45,5 @@ export default async function getPhotos(): Promise<Photo[]> {
     } as Photo;
   }).filter(Boolean) as Photo[];
 
-  return photos;
+  return photos.slice(0,1000);
 }

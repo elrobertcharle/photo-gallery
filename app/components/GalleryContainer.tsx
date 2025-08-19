@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react
 import PhotoRow from '@/interfacePhotoRow';
 import { Photo } from '@/photos';
 import Gallery from '@/app/components/Gallery';
+import G from '@/app/components/G';
 
 interface Props {
     photos: Photo[];
@@ -25,26 +26,38 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
 
     const rowLooksGood = (desiredRowWidth: number, currectRowWidth: number, maxShrinkScale: number, maxStretch: number): { good: boolean, scale: number } => {
         const result = { good: true, scale: 0 };
-        const scale = currectRowWidth / desiredRowWidth;
+        const scale = desiredRowWidth / currectRowWidth;
         result.good = scale >= maxShrinkScale && scale <= maxStretch;
         result.scale = scale;
         return result;
     }
 
-
     const computeRows = (photos: Photo[], desiredRowHeight: number, rowWidth: number): PhotoRow[] => {
-        console.log('photos.length', photos.length)
+        // console.log('computeRows', Date.now())
+        // console.log(rowWidth);
         let result: PhotoRow[] = [];
         let currectRow: PhotoRow = { photos: [], correctHeight: 0, scale: 0 };
         let currectRowWidth: number = 0;
         let currectPhotoWidth: number = 0;
         const maxShrinkScale = 1.2;
         const maxStretchScale = 0.8;
-        photos.map((photo) => {
+        photos.map((photo, index) => {
             currectPhotoWidth = photo.aspectRatio * desiredRowHeight;
             if (currectRow.photos.length == 0 || currectRowWidth + currectPhotoWidth < rowWidth) {
                 currectRow.photos.push(photo);
                 currectRowWidth += currectPhotoWidth;
+
+                if (index == photos.length - 1 && currectRow != result[result.length - 1]) {
+                    result.push(currectRow);
+                    const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, maxShrinkScale, maxStretchScale);
+                    if (looksGoodNow.good) {
+                        currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
+                        currectRow.scale = looksGoodNow.scale;
+                    } else {
+                        currectRow.correctHeight = desiredRowHeight;
+                        currectRow.scale = 1;
+                    }
+                }
             }
             else {
                 const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, maxShrinkScale, maxStretchScale);
@@ -75,7 +88,6 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
                 }
             }
         });
-        console.log('computeRows.length', result.reduce((ac, r) => ac + r.photos.length, 0));
         return result;
     };
 
@@ -84,7 +96,7 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
         const ro = new ResizeObserver(entries => {
             for (let ent of entries) {
                 setContainerSize({ width: ent.contentRect.width, height: ent.contentRect.height });
-                console.log("width", ent.contentRect.width);
+                // console.log("width", ent.contentRect.width);
             }
         });
         ro.observe(containerRef.current);
@@ -101,21 +113,22 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     }, [photos, desiredRowHeight, containerSize]);
 
     const onScroll = useCallback(({ scrollDirection, scrollOffset, scrollUpdateWasRequested }) => {
-        const container = containerRef.current;
-        if (!container) return;
+        // const container = containerRef.current;
+        // if (!container) return;
 
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+        // const { scrollTop, scrollHeight, clientHeight } = container;
+        // const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
 
-        if (distanceFromBottom === 0) {
-            console.log('Reached the bottom of the page!');
-            setPage((prev) => prev + 1);
-        }
+        // if (distanceFromBottom === 0) {
+        //     console.log('Reached the bottom of the page!');
+        //     setPage((prev) => prev + 1);
+        // }
     }, []);
 
     return (
-        <div ref={containerRef} style={{ flex: 1, overflow: 'hidden', backgroundColor: "#F08080" }}>
+        <div ref={containerRef} style={{ width: "100%", backgroundColor: "#F08080" }}>
             <Gallery rows={rows} onScroll={onScroll} rowWidth={containerSize.width} height={containerSize.height} />
+            {/* <G rows={rows} rowWidth={containerSize.width} height={containerSize.height}></G> */}
         </div>
     );
 }

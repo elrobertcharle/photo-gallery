@@ -11,7 +11,7 @@ export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: Ph
     const getRowHeight = useCallback((index: number) => {
         return rows[index].correctHeight;
     }, [rows]);
-
+    
 
     const Row = useCallback(({ index, style, data }: { index: number, style: any, data: PhotoRow[] }) => {
         const row = data[index];
@@ -33,7 +33,7 @@ export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: Ph
             itemCount={rows.length}
             itemSize={getRowHeight}
             width={rowWidth}
-            overscanCount={1}
+            overscanCount={5}
             itemData={rows}
             onScroll={onScroll}
         >
