@@ -1,9 +1,9 @@
 'use server'
 
-import WS from "@/app/components/WS";
+import GalleryContainer from "@/app/components/GalleryContainer"
 import getPhotos from "@/photos";
 
 export default async function PageWS() {
   const photos = await getPhotos(); // server-side
-  return <WS photos={photos} />;
+  return <GalleryContainer photos={photos} desiredRowHeight={200} />;
 }
