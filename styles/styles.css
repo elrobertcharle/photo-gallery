@@ -12,3 +12,7 @@ body {
 .List {
     border-width: 0px;
 }
+
+body{
+    background-color: red;
+}
