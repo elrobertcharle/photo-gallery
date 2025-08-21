@@ -32,7 +32,7 @@ export default async function getPhotos(): Promise<Photo[]> {
       return null;
     };
 
-    const [, filePath, w, h, extension] = matcher;
+    const [filePath, w, h, extension] = matcher;
     const width = parseInt(w, 10);
     const height = parseInt(h, 10);
 
