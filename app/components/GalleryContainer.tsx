@@ -125,7 +125,7 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
     // Recompute rows when width or photos change
     useLayoutEffect(() => {
         if (containerSize.width > 0) {
-            const newRows = computeRows(photos, desiredRowHeight, horizontalItemSpace, containerSize.width);
+            const newRows = computeRows(photos, desiredRowHeight, 0, containerSize.width);
             setRows(newRows);
         }
     }, [photos, desiredRowHeight, containerSize]);

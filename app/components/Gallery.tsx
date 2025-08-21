@@ -37,7 +37,7 @@ export default function Gallery({ rows, rowWidth, height, onScroll, rowClassName
         const row = data[index];
         return (
             <div style={style}>
-                <div className={rowClassName} style={{ display: "flex", gap: `${verticalItemSpace}px`, marginBottom: `${verticalItemSpace}px` }}>
+                <div className={rowClassName} style={{ display: "flex", gap: `${horizontalItemSpace}px`, marginBottom: `${verticalItemSpace}px` }}>
                     {row.photos.map((photo) => <img key={photo.alt} alt={photo.alt} title={photo.alt} src={photo.src} className={itemClassName} style={{ height: `${row.correctHeight}px`, minWidth: 0 }}></img>)}
                 </div>
             </div>
