@@ -1,14 +1,15 @@
 'use client';
 
-import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList as List } from "react-window";
 import "@styles/styles.css";
-import { Photo } from "@/photos";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import PhotoRow from "@/interfacePhotoRow";
 
-export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: PhotoRow[], rowWidth: number, height: number, onScroll: ({ scrollDirection, scrollOffset, scrollUpdateWasRequested }) => void }) {
+export type OnGalleryScrollEvent = (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
+
+export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: PhotoRow[], rowWidth: number, height: number, onScroll: OnGalleryScrollEvent }) {
     const listRef = useRef<List>(null);
+    const outerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (listRef.current) {
@@ -36,11 +37,21 @@ export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: Ph
         );
     }, [rows]);
 
+    const onListScroll = useCallback(() => {
+        const container = outerRef.current;
+        if (!container) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        if (onScroll)
+            onScroll(scrollTop, scrollHeight, clientHeight)
+    }, []);
+
 
     return (
 
         <List
             ref={listRef}
+            outerRef={outerRef}
             className="List"
             height={height}
             itemCount={rows.length}
@@ -48,7 +59,7 @@ export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: Ph
             width={rowWidth}
             overscanCount={1}
             itemData={rows}
-            onScroll={onScroll}
+            onScroll={onListScroll}
         >
             {Row}
         </List>
