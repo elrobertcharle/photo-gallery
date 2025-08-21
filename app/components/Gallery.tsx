@@ -38,7 +38,7 @@ export default function Gallery({ rows, rowWidth, height, onScroll, rowClassName
         return (
             <div style={style}>
                 <div className={rowClassName} style={{ display: "flex", gap: `${verticalItemSpace}px` }}>
-                    {row.photos.map((photo) => <img key={photo.alt} alt={photo.alt} title={photo.alt} src={photo.src} className={itemClassName} style={{ height: `${row.correctHeight}px`, gap: `${horizontalItemSpace}px`, minWidth: 0 }}></img>)}
+                    {row.photos.map((photo) => <img key={photo.alt} alt={photo.alt} title={photo.alt} src={photo.src} className={itemClassName} style={{ height: `${row.correctHeight}px`, gap: `${horizontalItemSpace}px`, minWidth: 0, width: "100%" }}></img>)}
                 </div>
             </div>
         );
