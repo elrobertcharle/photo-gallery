@@ -57,7 +57,7 @@ export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: Ph
             itemCount={rows.length}
             itemSize={getRowHeight}
             width={rowWidth}
-            overscanCount={1}
+            overscanCount={2}
             itemData={rows}
             onScroll={onListScroll}
         >

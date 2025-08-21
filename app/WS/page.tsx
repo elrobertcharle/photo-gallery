@@ -5,5 +5,5 @@ import getPhotos from "@/photos";
 
 export default async function PageWS() {
   const photos = await getPhotos(); // server-side
-  return <GalleryContainer photos={photos} desiredRowHeight={200} />;
+  return <GalleryContainer photos={photos} desiredRowHeight={500} />;
 }
