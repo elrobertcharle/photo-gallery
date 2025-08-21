@@ -12,10 +12,3 @@ body {
 .List {
     border-width: 0px;
 }
-
-.photo {
-    /* flex: 1 1 0; */
-    min-width: 0;
-    /*height: 100%;*/
-    /*object-fit: cover */
-}

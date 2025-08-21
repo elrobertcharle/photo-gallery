@@ -7,7 +7,18 @@ import PhotoRow from "@/interfacePhotoRow";
 
 export type OnGalleryScrollEvent = (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
 
-export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: PhotoRow[], rowWidth: number, height: number, onScroll: OnGalleryScrollEvent }) {
+export interface Props {
+    rows: PhotoRow[];
+    rowWidth: number;
+    height: number;
+    onScroll: OnGalleryScrollEvent;
+    rowClassName?: string | null;
+    itemClassName?: string | null;
+    verticalItemSpace: number;
+    horizontalItemSpace: number;
+};
+
+export default function Gallery({ rows, rowWidth, height, onScroll, rowClassName, itemClassName, verticalItemSpace, horizontalItemSpace }: Props) {
     const listRef = useRef<List>(null);
     const outerRef = useRef<HTMLDivElement>(null);
 
@@ -18,20 +29,16 @@ export default function Gallery({ rows, rowWidth, height, onScroll }: { rows: Ph
     }, [rowWidth]);
 
     const getRowHeight = useCallback((index: number) => {
-        return rows[index].correctHeight;
+        return rows[index].correctHeight + verticalItemSpace;
     }, [rows]);
 
 
     const Row = useCallback(({ index, style, data }: { index: number, style: any, data: PhotoRow[] }) => {
-        let className = "photo";
-        if (rows[index].scale == 1) {
-            className = "";
-        }
         const row = data[index];
         return (
             <div style={style}>
-                <div style={{ display: "flex" }}>
-                    {row.photos.map((photo) => <img key={photo.alt} alt={photo.alt} title={photo.alt} src={photo.src} className={className} style={{ height: `${row.correctHeight}px` }}></img>)}
+                <div className={rowClassName} style={{ display: "flex", gap: `${verticalItemSpace}px` }}>
+                    {row.photos.map((photo) => <img key={photo.alt} alt={photo.alt} title={photo.alt} src={photo.src} className={itemClassName} style={{ height: `${row.correctHeight}px`, gap: `${horizontalItemSpace}px`, minWidth: 0 }}></img>)}
                 </div>
             </div>
         );

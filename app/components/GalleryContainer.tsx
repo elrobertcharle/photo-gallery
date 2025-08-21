@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useLayoutEffect, useCallback } from 'react';
 import PhotoRow from '@/interfacePhotoRow';
 import { Photo } from '@/photos';
 import Gallery, { OnGalleryScrollEvent } from '@/app/components/Gallery';
@@ -7,6 +7,10 @@ import Gallery, { OnGalleryScrollEvent } from '@/app/components/Gallery';
 interface Props {
     photos: Photo[];
     desiredRowHeight: number;
+    verticalItemSpace: number;
+    horizontalItemSpace: number;
+    rowClassName?: string | null;
+    itemClassName?: string | null;
 }
 
 interface Size {
@@ -26,7 +30,7 @@ function debounce(func, delay) {
     };
 }
 
-export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
+export default function GalleryContainer({ photos, desiredRowHeight, verticalItemSpace, horizontalItemSpace, rowClassName, itemClassName }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerSize, setContainerSize] = useState<Size>({ width: 0, height: 0 });
     const [rows, setRows] = useState<PhotoRow[]>([]);
@@ -40,7 +44,7 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
         return result;
     }
 
-    const computeRows = (photos: Photo[], desiredRowHeight: number, rowWidth: number): PhotoRow[] => {
+    const computeRows = (photos: Photo[], desiredRowHeight: number, hItemSpace: number, rowWidth: number): PhotoRow[] => {
         let result: PhotoRow[] = [];
         let currectRow: PhotoRow = { photos: [], correctHeight: 0, scale: 0 };
         let currectRowWidth: number = 0;
@@ -49,9 +53,9 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
         const maxStretchScale = 0.8;
         photos.map((photo, index) => {
             currectPhotoWidth = photo.aspectRatio * desiredRowHeight;
-            if (currectRow.photos.length == 0 || currectRowWidth + currectPhotoWidth < rowWidth) {
+            if (currectRow.photos.length == 0 || currectRowWidth + hItemSpace + currectPhotoWidth < rowWidth) {
                 currectRow.photos.push(photo);
-                currectRowWidth += currectPhotoWidth;
+                currectRowWidth += (hItemSpace + currectPhotoWidth);
 
                 if (index == photos.length - 1 && currectRow != result[result.length - 1]) {
                     result.push(currectRow);
@@ -67,12 +71,12 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
             }
             else {
                 const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, maxShrinkScale, maxStretchScale);
-                const looksGoodWithAnother = rowLooksGood(rowWidth, currectRowWidth + currectPhotoWidth, maxShrinkScale, maxStretchScale);
+                const looksGoodWithAnother = rowLooksGood(rowWidth, currectRowWidth + hItemSpace + currectPhotoWidth, maxShrinkScale, maxStretchScale);
                 const desviation1 = Math.abs(looksGoodNow.scale - 1);
                 const desviation2 = Math.abs(looksGoodWithAnother.scale - 1);
                 if (desviation2 < desviation1) {
-                    result.push(currectRow);
                     currectRow.photos.push(photo);
+                    result.push(currectRow);
                     currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodWithAnother.scale);
                     currectRow.scale = looksGoodWithAnother.scale;
 
@@ -121,14 +125,14 @@ export default function GalleryContainer({ photos, desiredRowHeight }: Props) {
     // Recompute rows when width or photos change
     useLayoutEffect(() => {
         if (containerSize.width > 0) {
-            const newRows = computeRows(photos, desiredRowHeight, containerSize.width);
+            const newRows = computeRows(photos, desiredRowHeight, horizontalItemSpace, containerSize.width);
             setRows(newRows);
         }
     }, [photos, desiredRowHeight, containerSize]);
 
     return (
         <div ref={containerRef} style={{ width: "100%" }}>
-            <Gallery onScroll={onScroll} rows={rows} rowWidth={containerSize.width} height={containerSize.height} />
+            <Gallery onScroll={onScroll} rows={rows} rowWidth={containerSize.width} height={containerSize.height} rowClassName={rowClassName} itemClassName={itemClassName} verticalItemSpace={verticalItemSpace} horizontalItemSpace={horizontalItemSpace} />
         </div>
     );
 }
