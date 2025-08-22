@@ -1,6 +1,5 @@
-html,
 body,
-#root {
+html {
     height: 100%;
     margin: 0;
 }
@@ -11,8 +10,4 @@ body {
 
 .List {
     border-width: 0px;
-}
-
-body{
-    background-color: red;
 }

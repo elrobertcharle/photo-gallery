@@ -36,9 +36,9 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
     const [rows, setRows] = useState<PhotoRow[]>([]);
     const [page, setPage] = useState(initialPageCount);
 
-    const rowLooksGood = (desiredRowWidth: number, currectRowWidth: number, maxShrinkScale: number, maxStretch: number): { good: boolean, scale: number } => {
+    const rowLooksGood = (desiredRowWidth: number, currectRowWidth: number, totalHorizontalItemSpace, maxShrinkScale: number, maxStretch: number): { good: boolean, scale: number } => {
         const result = { good: true, scale: 0 };
-        const scale = desiredRowWidth / currectRowWidth;
+        const scale = (desiredRowWidth - totalHorizontalItemSpace) / (currectRowWidth - totalHorizontalItemSpace);
         result.good = scale >= maxShrinkScale && scale <= maxStretch;
         result.scale = scale;
         return result;
@@ -55,13 +55,16 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
             currectPhotoWidth = photo.aspectRatio * desiredRowHeight;
             if (currectRow.photos.length == 0 || currectRowWidth + hItemSpace + currectPhotoWidth < rowWidth) {
                 currectRow.photos.push(photo);
-                currectRowWidth += (hItemSpace + currectPhotoWidth);
+                if (currectRow.photos.length == 1)
+                    currectRowWidth = currectPhotoWidth;
+                else
+                    currectRowWidth += (hItemSpace + currectPhotoWidth);
 
-                if (index == photos.length - 1 && currectRow != result[result.length - 1]) {
+                if (index == photos.length - 1) {
                     result.push(currectRow);
-                    const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, maxShrinkScale, maxStretchScale);
+                    const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, (currectRow.photos.length - 1) * horizontalItemSpace, maxShrinkScale, maxStretchScale);
                     if (looksGoodNow.good) {
-                        currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
+                        currectRow.correctHeight = (desiredRowHeight * looksGoodNow.scale);
                         currectRow.scale = looksGoodNow.scale;
                     } else {
                         currectRow.correctHeight = desiredRowHeight;
@@ -70,14 +73,14 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
                 }
             }
             else {
-                const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, maxShrinkScale, maxStretchScale);
-                const looksGoodWithAnother = rowLooksGood(rowWidth, currectRowWidth + hItemSpace + currectPhotoWidth, maxShrinkScale, maxStretchScale);
+                const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, (currectRow.photos.length - 1) * horizontalItemSpace, maxShrinkScale, maxStretchScale);
+                const looksGoodWithAnother = rowLooksGood(rowWidth, currectRowWidth + hItemSpace + currectPhotoWidth, currectRow.photos.length, maxShrinkScale, maxStretchScale);
                 const desviation1 = Math.abs(looksGoodNow.scale - 1);
                 const desviation2 = Math.abs(looksGoodWithAnother.scale - 1);
                 if (desviation2 < desviation1) {
                     currectRow.photos.push(photo);
                     result.push(currectRow);
-                    currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodWithAnother.scale);
+                    currectRow.correctHeight = (desiredRowHeight * looksGoodWithAnother.scale);
                     currectRow.scale = looksGoodWithAnother.scale;
 
                     //reset
@@ -86,10 +89,22 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
                 } else {
                     result.push(currectRow);
 
-                    currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
+                    currectRow.correctHeight = (desiredRowHeight * looksGoodNow.scale);
                     currectRow.scale = looksGoodNow.scale;
                     currectRow = { photos: [photo], correctHeight: 0, scale: 0 };
                     currectRowWidth = currectPhotoWidth;
+
+                    if (index == photos.length - 1) {
+                        result.push(currectRow);
+                        const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, 0, maxShrinkScale, maxStretchScale);
+                        if (looksGoodNow.good) {
+                            currectRow.correctHeight = (desiredRowHeight * looksGoodNow.scale);
+                            currectRow.scale = looksGoodNow.scale;
+                        } else {
+                            currectRow.correctHeight = desiredRowHeight;
+                            currectRow.scale = 1;
+                        }
+                    }
                 }
             }
         });
@@ -125,7 +140,7 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
     // Recompute rows when width or photos change
     useLayoutEffect(() => {
         if (containerSize.width > 0) {
-            const newRows = computeRows(photos, desiredRowHeight, 0, containerSize.width);
+            const newRows = computeRows(photos, desiredRowHeight, horizontalItemSpace, containerSize.width);
             setRows(newRows);
         }
     }, [photos, desiredRowHeight, containerSize]);
