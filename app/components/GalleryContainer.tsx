@@ -64,7 +64,7 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
                     result.push(currectRow);
                     const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, (currectRow.photos.length - 1) * horizontalItemSpace, maxShrinkScale, maxStretchScale);
                     if (looksGoodNow.good) {
-                        currectRow.correctHeight = (desiredRowHeight * looksGoodNow.scale);
+                        currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
                         currectRow.scale = looksGoodNow.scale;
                     } else {
                         currectRow.correctHeight = desiredRowHeight;
@@ -80,7 +80,7 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
                 if (desviation2 < desviation1) {
                     currectRow.photos.push(photo);
                     result.push(currectRow);
-                    currectRow.correctHeight = (desiredRowHeight * looksGoodWithAnother.scale);
+                    currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodWithAnother.scale);
                     currectRow.scale = looksGoodWithAnother.scale;
 
                     //reset
@@ -89,7 +89,7 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
                 } else {
                     result.push(currectRow);
 
-                    currectRow.correctHeight = (desiredRowHeight * looksGoodNow.scale);
+                    currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
                     currectRow.scale = looksGoodNow.scale;
                     currectRow = { photos: [photo], correctHeight: 0, scale: 0 };
                     currectRowWidth = currectPhotoWidth;
@@ -98,7 +98,7 @@ export default function GalleryContainer({ photos, desiredRowHeight, verticalIte
                         result.push(currectRow);
                         const looksGoodNow = rowLooksGood(rowWidth, currectRowWidth, 0, maxShrinkScale, maxStretchScale);
                         if (looksGoodNow.good) {
-                            currectRow.correctHeight = (desiredRowHeight * looksGoodNow.scale);
+                            currectRow.correctHeight = Math.ceil(desiredRowHeight * looksGoodNow.scale);
                             currectRow.scale = looksGoodNow.scale;
                         } else {
                             currectRow.correctHeight = desiredRowHeight;
